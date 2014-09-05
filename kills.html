@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
+        <link rel="stylesheet" href="jquery-ui/jquery-ui.structure.min.css" />
+        <link rel="stylesheet" href="jquery-ui/jquery-ui.theme.min.css" />
         <link rel="stylesheet" href="style.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="jquery-ui/jquery-ui.min.js"></script>
+        <script src="sorttable.js"></script>
         <script src="script.js"></script>
     </head>
     <body>
@@ -12,5 +16,18 @@
     <div id="error">
         Error! <a href="javascript:void(0)" id="errorRetry">Try again</a>.
     </div>
+    <table id="killsGrid" class="dataGrid sortable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Race</th>
+                <th>Kills</th>
+                <th>K/D</th>
+            </tr>
+            
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     </body>
 </html>

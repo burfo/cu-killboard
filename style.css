@@ -2,3 +2,26 @@
 {
     display: none;
 }
+
+.dataGrid thead
+{
+    background-color:#eee;
+    color:#666666;
+    font-weight: bold;
+    cursor: default;
+}
+
+.dataGrid tr.Arthurian
+{
+    background-color: rgba(215, 38, 38, 0.1);
+}
+
+.dataGrid tr.TDD
+{
+    background-color: rgba(38, 215, 38, 0.1);
+}
+
+.dataGrid tr.Viking
+{
+    background-color: rgba(38, 38, 215, 0.1);
+}
