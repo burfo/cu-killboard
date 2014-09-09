@@ -3,78 +3,49 @@ var kb = {};
 
 CU.KillBoard = (function ()
 {
-    function KB()
+    function KillBoard()
     {
         this.startDate = "";
-        this.endDate = "";
         this.listQtyLimit = 20;
     };
     
-    KB.prototype.apiUrl = "http://chat.camelotunchained.com:8000/api/kills";
-    KB.prototype.sampleStartDate = new Date('2014-09-05T04:30:00.000Z');
-    KB.prototype.sampleEndDate = new Date('2014-09-06T04:30:00.000Z');
+    KillBoard.prototype.apiUrl = "http://chat.camelotunchained.com:8000/api/kills";
+    KillBoard.prototype.sampleStartDate = new Date('2014-09-05T04:30:00.000Z');
+    KillBoard.prototype.sampleEndDate = new Date('2014-09-06T04:30:00.000Z');
     
-    KB.prototype.init = function ()
+    KillBoard.prototype.init = function KillBoard$init()
     {
-        $("#errorRetry").click($.proxy(function ()
-        {
-            this.initialLoad();
-        }, this));
+        $.support.cors = true;  //trick it to work in IE
         
-        $("#btnKills").click($.proxy(function ()
-        {
-            $("#killsGrid").show();
-            $("#deathsGrid").hide();
-            $("#kdGrid").hide();
-        }, this));
-        
-        $("#btnDeaths").click($.proxy(function ()
-        {
-            $("#deathsGrid").show();
-            $("#killsGrid").hide();
-            $("#kdGrid").hide();
-        }, this));
-        
-        $("#btnKD").click($.proxy(function ()
-        {
-            $("#kdGrid").show();
-            $("#deathsGrid").hide();
-            $("#killsGrid").hide();
-        }, this));
+        $("#errorRetry").click($.proxy(this._initialLoad, this));
+        $("#btnKills").click($.proxy(this._onBtnKillsClicked, this));
+        $("#btnDeaths").click($.proxy(this._onBtnDeathsClicked, this));
+        $("#btnKD").click($.proxy(this._onBtnKDClicked, this));
         
         $("#buttons").buttonset();
         
-        
-        this.initialLoad();
-        $("#btnKills").click().tooltip({content: "test" });
+        this._initialLoad();
+        $("#btnKills").click();
     };
     
-    KB.prototype.initialLoad = function ()
+    KillBoard.prototype._initialLoad = function KillBoard$_initialLoad()
     {
         $("#allData").hide();
         $("#error").hide();
         $("#loader").show();
-        this.refreshData();
+        this._refreshData();
     };
     
-    KB.prototype.refreshData = function ()
+    KillBoard.prototype._refreshData = function KillBoard$_refreshData()
     {
         $.ajax({
             method: 'GET',
             url: this.apiUrl + (this.startDate ? "?start=" + this.startDate.toISOString() : ""),
             dataType: 'json'
-        }).done($.proxy(function(data) {
-            var allData = this.receiveIncomingData(data);
-            this.displayData(allData);
-            $("#loader").fadeOut();
-            window.setTimeout($.proxy(this.refreshData, this), 60000);
-        }, this)).fail($.proxy(function(jqXHR, textStatus, errorThrown) {
-            $("#loader").hide();
-            $("#error").show();
-        }, this));
+        }).done($.proxy(this._onLoadDataSuccess, this)).fail($.proxy(this._onLoadDataFail, this));
     };
     
-    KB.prototype.receiveIncomingData = function (killData)
+    KillBoard.prototype._onLoadDataSuccess = function KillBoard$_onLoadDataSuccess(killData)
     {
         var name;
         var killers = {};
@@ -82,7 +53,7 @@ CU.KillBoard = (function ()
         
         for (var index = 0; index < killData.length; index++)
         {
-            kill = killData[index];
+            var kill = killData[index];
             
             if (kill.victim && kill.victim.name)
             {
@@ -97,7 +68,7 @@ CU.KillBoard = (function ()
             }
             
             //don't tally a kill if the victim killed theirself
-            if (kill.killer && kill.killer.name && (!kill.victim || !kill.victim.name || kill.victim.name != kill.killer.name))
+            if (kill.killer && kill.killer.name && (!kill.victim || !kill.victim.name || kill.victim.name !== kill.killer.name))
             {
                 name = kill.killer.name;
                 
@@ -110,7 +81,7 @@ CU.KillBoard = (function ()
             }
         }
         
-        for (key in killers)
+        for (var key in killers)
         {
             if (!killers.hasOwnProperty(key))
             {
@@ -120,12 +91,21 @@ CU.KillBoard = (function ()
             killersAry.push(killers[key]);
         }
         
-        return killersAry;
+        this._displayData(killersAry);
+        $("#loader").fadeOut(1500);
+        window.setTimeout($.proxy(this._refreshData, this), 120000);  //2 minutes
     };
     
-    KB.prototype.displayData = function (killers)
+    KillBoard.prototype._onLoadDataFail = function KillBoard$_onLoadDataFail(jqXHR, textStatus, errorThrown)
     {
-        
+        $("#loader").hide();
+        $("#error").show();
+        console.log("AJAX error :: '" + textStatus + "' :: " + (errorThrown ? JSON.stringify(errorThrown) : ""));
+    };
+    
+    KillBoard.prototype._displayData = function KillBoard$_displayData(killers)
+    {
+    	var killer, row, name, idx;
         /** Kills **/
         var tableBody = $("#killsGrid > tbody:last");
         tableBody.empty();
@@ -134,20 +114,20 @@ CU.KillBoard = (function ()
             return b.kills - a.kills;
         }).slice(0, this.listQtyLimit);
         
-        for (var idx = 0; idx < killsEntries.length; idx++)
+        for (idx = 0; idx < killsEntries.length; idx++)
         {
-            var killer = killsEntries[idx];
-            var row = document.createElement("tr");
+            killer = killsEntries[idx];
+            row = document.createElement("tr");
             $(tableBody).append(row);
             row = $(row);
             row.append(document.createElement("td"));
-            var name = CU.truncateString(killer.name);
+            name = this.truncateString(killer.name);
             row.append($(document.createElement("td")).text(name));
             row.append($(document.createElement("td")).text(killer.kills));
             row.addClass(killer.faction);
             row.tooltip(
             {
-                content: this.killerTooltip(killer),
+                content: this._killerTooltip(killer),
                 items: "tr",
                 track: true
             });
@@ -167,46 +147,45 @@ CU.KillBoard = (function ()
             return comp;
         }).slice(0, this.listQtyLimit);
         
-        for (var idx = 0; idx < kdEntries.length; idx++)
+        for (idx = 0; idx < kdEntries.length; idx++)
         {
-            var killer = kdEntries[idx];
-            var row = document.createElement("tr");
+            killer = kdEntries[idx];
+            row = document.createElement("tr");
             $(tableBody).append(row);
             row = $(row);
             row.append(document.createElement("td"));
-            row.append($(document.createElement("td")).text(CU.truncateString(killer.name)));
-            var kdDisplay = +killer.killDeathRatio().toFixed(2);
-            row.append($(document.createElement("td")).text(kdDisplay));
+            row.append($(document.createElement("td")).text(this.truncateString(killer.name)));
+            row.append($(document.createElement("td")).text(killer.killDeathRatio(true)));
             row.addClass(killer.faction);
             row.tooltip(
             {
-                content: this.killerTooltip(killer),
+                content: this._killerTooltip(killer),
                 items: "tr",
                 track: true
             });
         }
         
         /** Deaths **/
-        var tableBody = $("#deathsGrid > tbody:last");
+        tableBody = $("#deathsGrid > tbody:last");
         tableBody.empty();
-        var killsEntries = killers.sort(function (a,b)
+        var deathEntries = killers.sort(function (a,b)
         {
             return b.deaths - a.deaths;
         }).slice(0, this.listQtyLimit);
         
-        for (var idx = 0; idx < killsEntries.length; idx++)
+        for (idx = 0; idx < deathEntries.length; idx++)
         {
-            var killer = killsEntries[idx];
-            var row = document.createElement("tr");
+        	killer = deathEntries[idx];
+            row = document.createElement("tr");
             $(tableBody).append(row);
             row = $(row);
             row.append(document.createElement("td"));
-            row.append($(document.createElement("td")).text(CU.truncateString(killer.name)));
+            row.append($(document.createElement("td")).text(this.truncateString(killer.name)));
             row.append($(document.createElement("td")).text(killer.deaths));
             row.addClass(killer.faction);
             row.tooltip(
             {
-                content: this.killerTooltip(killer),
+                content: this._killerTooltip(killer),
                 items: "tr",
                 track: true
             });
@@ -215,12 +194,39 @@ CU.KillBoard = (function ()
         $("#allData").show();
     };
     
-    KB.prototype.killerTooltip = function (killer)
+    KillBoard.prototype._killerTooltip = function KillBoard$_killerTooltip(killer)
     {
-        return "<b>" + CU.truncateString(killer.name) + "</b><br />Kills: " + killer.kills + "<br />Deaths: " + killer.deaths + "<br />K/D: " + (+killer.killDeathRatio().toFixed(2)) + "<br />" + killer.faction;
+        return "<b>" + this.truncateString(killer.name) + "</b><br />Kills: " + killer.kills + "<br />Deaths: " + killer.deaths + "<br />K/D: " + killer.killDeathRatio(true) + "<br />" + killer.faction;
     };
     
-    return KB;
+    KillBoard.prototype._onBtnKillsClicked = function KillBoard$_onBtnKillsClicked()
+    {
+        $("#killsGrid").show();
+        $("#deathsGrid").hide();
+        $("#kdGrid").hide();
+    };
+    
+    KillBoard.prototype._onBtnDeathsClicked = function KillBoard$_onBtnDeathsClicked()
+    {
+        $("#deathsGrid").show();
+        $("#killsGrid").hide();
+        $("#kdGrid").hide();
+    };
+    
+    KillBoard.prototype._onBtnKDClicked = function KillBoard$_onBtnKDClicked()
+    {
+        $("#kdGrid").show();
+        $("#deathsGrid").hide();
+        $("#killsGrid").hide();
+    };
+    
+    KillBoard.prototype.truncateString = function KillBoard$truncateString(str, len)
+    {
+        if (!len) len = 35;
+        return str.length > len ? str.substring(0, len - 1) + "\u2026" : str; //aka &hellip;
+    };
+    
+    return KillBoard;
 })();
 
 CU.Killer = (function ()
@@ -231,25 +237,26 @@ CU.Killer = (function ()
         this.kills = 0;
         this.deaths = 0;
         
-        if (faction == 3) this.faction = CU.Factions.Arthurian;
-        else if (faction == 1) this.faction = CU.Factions.TDD;
-        else if (faction == 2) this.faction = CU.Factions.Viking;
+        if (faction === 3 || faction === "3") this.faction = CU.Factions.Arthurian;
+        else if (faction === 1 || faction === "1") this.faction = CU.Factions.TDD;
+        else if (faction === 2 || faction === "2") this.faction = CU.Factions.Viking;
         else this.faction = CU.Factions.Factionless;
     };
     
-    Killer.prototype.killDeathRatio = function ()
+    Killer.prototype.killDeathRatio = function Killer$killDeathRatio(displayMode)
     {
-        if (this.kills == 0)
+        if (!this.kills)
         {
             return 0;
         }
         
-        if (this.deaths == 0)
+        if (!this.deaths)
         {
-            return Number.POSITIVE_INFINITY;
+            return displayMode ? "\u221E" : Number.POSITIVE_INFINITY; //aka &infin;
         }
         
-        return this.kills / this.deaths;
+        var kd = this.kills / this.deaths;
+        return displayMode ? (+kd.toFixed(2)) : kd;
     };
     
     return Killer;
@@ -263,11 +270,6 @@ CU.Factions =
     Factionless: "Factionless"
 };
 if ((typeof Object.freeze) === "function") Object.freeze(CU.Factions);
-
-CU.truncateString = function (str, len)
-{
-    return str.length > len ? str.substring(0, len - 1) + "&infin;" : str;
-};
 
 $(function() {
     kb = new CU.KillBoard();
