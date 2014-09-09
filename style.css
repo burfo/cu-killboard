@@ -1,14 +1,42 @@
-#error
+body
+{
+    background-color: #555;
+    color: #ccc;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 0.75em;
+}
+
+#loader
+{
+    position: absolute;
+    z-index: 100;
+}
+
+#error, #allData
+{
+    display: none;
+}
+
+#allData
+{
+    width: 400px;
+}
+
+.dataGrid
 {
     display: none;
 }
 
 .dataGrid thead
 {
-    background-color:#eee;
-    color:#666666;
+    background-color: #eee;
+    color: #666;
     font-weight: bold;
-    cursor: default;
+}
+
+.dataGrid td:first-child
+{
+    width: 15px;
 }
 
 .dataGrid tr.Arthurian
@@ -16,12 +44,27 @@
     background-color: rgba(215, 38, 38, 0.1);
 }
 
+.dataGrid tr.Arthurian td:first-child
+{
+    background: url("images/a.png") no-repeat scroll center center;
+}
+
 .dataGrid tr.TDD
 {
     background-color: rgba(38, 215, 38, 0.1);
 }
 
+.dataGrid tr.TDD td:first-child
+{
+    background: url("images/t.png") no-repeat scroll center center;
+}
+
 .dataGrid tr.Viking
 {
     background-color: rgba(38, 38, 215, 0.1);
+}
+
+.dataGrid tr.Viking td:first-child
+{
+    background: url("images/v.png") no-repeat scroll center center;
 }

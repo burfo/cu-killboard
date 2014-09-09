@@ -1,33 +1,65 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <link rel="stylesheet" href="jquery-ui/jquery-ui.structure.min.css" />
-        <link rel="stylesheet" href="jquery-ui/jquery-ui.theme.min.css" />
+        <title>Camelot Unchained Kill Board</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="jquery-ui/jquery-ui.min.css" />
         <link rel="stylesheet" href="style.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="jquery-ui/jquery-ui.min.js"></script>
-        <script src="sorttable.js"></script>
         <script src="script.js"></script>
     </head>
     <body>
     <div id="loader">
-        <img src="images/loader.gif" />
+        <img src="images/loader.gif" alt="loading..." />
     </div>
-    <div id="error">
+    <div id="error" class="ui-state-error ui-corner-all">
+        <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
         Error! <a href="javascript:void(0)" id="errorRetry">Try again</a>.
     </div>
-    <table id="killsGrid" class="dataGrid sortable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Race</th>
-                <th>Kills</th>
-                <th>K/D</th>
-            </tr>
-            
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div id="allData">
+        <div id="buttons">
+            <input type="radio" id="btnKills" name="buttons" /><label for="btnKills">Kills</label>
+            <input type="radio" id="btnDeaths" name="buttons" /><label for="btnDeaths">Deaths</label>
+            <input type="radio" id="btnKD" name="buttons" /><label for="btnKD">K/D Ratio</label>
+        </div>
+        
+        <table id="killsGrid" class="dataGrid">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Kills</th>
+                </tr>
+                
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <table id="kdGrid" class="dataGrid">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>K/D</th>
+                </tr>
+                
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <table id="deathsGrid" class="dataGrid">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Deaths</th>
+                </tr>
+                
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
     </body>
 </html>
